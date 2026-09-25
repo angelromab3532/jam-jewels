@@ -1,0 +1,2 @@
+{"type":"call","ts":1790330578,"task":"approve-pipeline","model":"opus","model_id":"claude-opus-5"}
+{"type":"call","ts":1790332818,"task":"validate-screenshots","model":"haiku","model_id":"claude-haiku-4-5"}
