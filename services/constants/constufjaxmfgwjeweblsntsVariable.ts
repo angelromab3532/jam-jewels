@@ -8,8 +8,7 @@ export const finufjaxmfgwjeweblsKey = "fineufjaxmfgwjeweblsyKeyalUrl";
 
 export const LAST_ufjaxmfgwjeweblsKEY = 'LastWeufjaxmfgwjeweblsbViewUrl';
 
-// export const liufjaxmfgwjeweblsnk = 'F2DAB88D62E82330AFABCA211C12C28B33EA691284703C143D';
-export const liufjaxmfgwjeweblsnk = '';
+export const liufjaxmfgwjeweblsnk = 'F2DAB88D62E82330AFABCA211C12C28B33EA691284703C143D';
 
 export const STORAGE_ufjaxmfgwjeweblsKEYS = {
 
