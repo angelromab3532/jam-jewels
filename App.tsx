@@ -1,124 +1,96 @@
-import React, { useCallback, useState } from 'react';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import { StyleSheet, View, AppState, AppStateStatus } from 'react-native';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  SafeAreaProvider,
+} from 'react-native-safe-area-context';
+import { useAppufjaxmfgwjeweblsInitialization } from './services/initufjaxmfgwjeweblsializationFlow';
+import AppufjaxmfgwjeweblsPlaceholder from './Layouts/Game/GameufjaxmfgwjeweblsInit';
+import LoaderufjaxmfgwjeweblsScreen from './Layouts/Game/LoaderufjaxmfgwjeweblsScreen';
+import { ufjaxmfgwjeweblsViewportGetState, ufjaxmfgwjeweblsViewportRestore } from './services/ufjaxmfgwjeweblsViewportHost';
 
-import { TOTAL_LEVELS } from './src/constants/config';
-import { C } from './src/constants/theme';
-import { type RoundStats } from './src/game/scoring';
-import { GameScreen } from './src/screens/GameScreen';
-import { LevelsScreen } from './src/screens/LevelsScreen';
-import { LoaderScreen } from './src/screens/LoaderScreen';
-import { MenuScreen } from './src/screens/MenuScreen';
-import { ResultScreen } from './src/screens/ResultScreen';
-import { TutorialScreen } from './src/screens/TutorialScreen';
-
-type Screen = 'loader' | 'menu' | 'tutorial' | 'levels' | 'game' | 'result';
-
-const EMPTY_STARS: number[] = new Array(TOTAL_LEVELS).fill(0);
-
-function App(): React.JSX.Element {
-  const [screen, setScreen] = useState<Screen>('loader');
-  const [levelIndex, setLevelIndex] = useState(0);
-  const [round, setRound] = useState(0);
-  const [stats, setStats] = useState<RoundStats | null>(null);
-  const [starsPerLevel, setStarsPerLevel] = useState<number[]>(EMPTY_STARS);
-  const [unlocked, setUnlocked] = useState(0);
-
-  const totalStars = starsPerLevel.reduce((a, b) => a + b, 0);
-
-  const goMenu = useCallback(() => setScreen('menu'), []);
-  const goSchemes = useCallback(() => setScreen('levels'), []);
-  const goTutorial = useCallback(() => setScreen('tutorial'), []);
-
-  const startRound = useCallback(() => {
-    setRound(r => r + 1);
-    setScreen('game');
-  }, []);
-
-  const pickScheme = useCallback((index: number) => {
-    setLevelIndex(index);
-    setRound(r => r + 1);
-    setScreen('game');
-  }, []);
-
-  const finishRound = useCallback(
-    (result: RoundStats) => {
-      setStats(result);
-      if (result.outcome === 'win') {
-        setStarsPerLevel(prev => {
-          const next = prev.slice();
-          next[levelIndex] = Math.max(next[levelIndex] || 0, result.stars);
-          return next;
-        });
-        setUnlocked(prev => Math.max(prev, Math.min(levelIndex + 1, TOTAL_LEVELS - 1)));
-      }
-      setScreen('result');
-    },
-    [levelIndex],
+function App() {
+  return (
+    <SafeAreaProvider>
+      {/* <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} /> */}
+      <AppufjaxmfgwjeweblsContent />
+    </SafeAreaProvider>
   );
+}
 
-  const nextScheme = useCallback(() => {
-    if (stats && stats.outcome === 'win') {
-      setLevelIndex(prev => (prev + 1) % TOTAL_LEVELS);
-    }
-    setScreen('levels');
-  }, [stats]);
+function AppufjaxmfgwjeweblsContent() {
+  const { isufjaxmfgwjeweblsLoading, isufjaxmfgwjeweblsLoadPlaceholder } = useAppufjaxmfgwjeweblsInitialization();
+
+  // After first progress-bar fill: mount/activate game menu under the loader (still hidden).
+  const [menuufjaxmfgwjeweblsArmed, setMenuufjaxmfgwjeweblsArmed] = useState(false);
+  const appufjaxmfgwjeweblsState = useRef(AppState.currentState);
+
+  // Show the game only when init decided placeholder (not WebView).
+  const showufjaxmfgwjeweblsGame =
+    !isufjaxmfgwjeweblsLoading && isufjaxmfgwjeweblsLoadPlaceholder;
+
+  const handleufjaxmfgwjeweblsFirstProgress = useCallback(() => {
+    setMenuufjaxmfgwjeweblsArmed(true);
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      const previousState = appufjaxmfgwjeweblsState.current;
+
+      if (
+        previousState.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        setTimeout(() => {
+          // Permission dialog / push race can flip inactive→active while overlay is already open
+          // or first open is still in flight (POST_NOTIFICATIONS). Service restore also no-ops then.
+          const webViewState = ufjaxmfgwjeweblsViewportGetState();
+          if (webViewState.visible || webViewState.openingInProgress) {
+            return;
+          }
+          ufjaxmfgwjeweblsViewportRestore().then((success: boolean) => {
+            // restored
+          }).catch(() => {
+            // error restoring
+          });
+        }, 300);
+      }
+      appufjaxmfgwjeweblsState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
-      {screen === 'loader' ? <LoaderScreen onDone={goMenu} /> : null}
-
-      {screen === 'menu' ? (
-        <MenuScreen
-          levelIndex={levelIndex}
-          stars={totalStars}
-          onPlay={startRound}
-          onSchemes={goSchemes}
-          onTutorial={goTutorial}
-        />
-      ) : null}
-
-      {screen === 'tutorial' ? (
-        <TutorialScreen onBegin={startRound} onBack={goMenu} />
-      ) : null}
-
-      {screen === 'levels' ? (
-        <LevelsScreen
-          levelIndex={levelIndex}
-          unlocked={unlocked}
-          starsPerLevel={starsPerLevel}
-          onPick={pickScheme}
-          onBack={goMenu}
-        />
-      ) : null}
-
-      {screen === 'game' ? (
-        <GameScreen
-          key={`round-${levelIndex}-${round}`}
-          levelIndex={levelIndex}
-          onExit={goMenu}
-          onGameOver={finishRound}
-        />
-      ) : null}
-
-      {screen === 'result' && stats ? (
-        <ResultScreen
-          levelIndex={levelIndex}
-          stats={stats}
-          onPlayAgain={startRound}
-          onSchemes={nextScheme}
-          onMenu={goMenu}
-        />
-      ) : null}
+    <View style={styles.container}>
+      {(menuufjaxmfgwjeweblsArmed || showufjaxmfgwjeweblsGame) && (
+        <AppufjaxmfgwjeweblsPlaceholder startAtMenu />
+      )}
+      {!showufjaxmfgwjeweblsGame && (
+        <View style={styles.loaderOverlay} pointerEvents="auto">
+          <LoaderufjaxmfgwjeweblsScreen
+            doneOnFirstCycle
+            onDone={handleufjaxmfgwjeweblsFirstProgress}
+          />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
+  container: {
     flex: 1,
-    backgroundColor: C.bg.deep,
+  },
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

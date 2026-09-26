@@ -1,9 +1,0 @@
-{
-  "assets": [
-    {"name":"icon_1024","type":"icon","prompt":"App icon, one single glossy 3D faceted diamond gemstone, violet to crimson gradient facets with thin gold rim and bright white highlight, centered, dark purple radial gradient background, crisp, no text, no scene, no other objects"},
-    {"name":"bg_loader","type":"bg","prompt":"Vertical 9:16 mobile game loader background, dark empty theatre stage, deep aubergine and black velvet curtains, single narrow golden spotlight beam with dust motes, cinematic, very dark and moody, no text, no UI elements"},
-    {"name":"bg_menu","type":"bg","prompt":"Vertical 9:16 mobile game menu background, ornate dark theatre stage with purple velvet curtains, a large glowing amethyst gemstone floating in a golden light beam, rich violet and gold, 3D render, vibrant, no text, no UI elements"},
-    {"name":"bg_game","type":"bg","prompt":"Vertical 9:16 mobile game background, soft blurred dark purple theatre interior, low contrast, out of focus velvet and faint golden haze, dim, suitable for UI overlay, no text, no UI elements"},
-    {"name":"sprite_gem","type":"sprite","prompt":"One single glossy 3D faceted diamond gemstone, violet and crimson facets with gold rim, centered icon, isolated on plain white, no other objects, no text"}
-  ]
-}
